@@ -69,10 +69,6 @@ sensible defaults.
     # To only cache runs from `master`:
     save-if: ${{ github.ref == 'refs/heads/master' }}
 
-    # Specifies what to use as the backend providing cache
-    # Can be set to either "github" or "buildjet"
-    # default: "github"
-    cache-provider: ""
 ```
 
 Further examples are available in the [.github/workflows](./.github/workflows/) directory.
