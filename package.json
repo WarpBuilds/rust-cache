@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "rust-cache",
-  "version": "2.7.3",
+  "version": "2.8.0",
   "description": "A GitHub Action that implements smart caching for rust/cargo projects with sensible defaults.",
   "keywords": [
     "actions",
@@ -23,7 +23,7 @@
   "homepage": "https://github.com/Swatinem/rust-cache#readme",
   "dependencies": {
     "@actions/buildjet-cache": "npm:github-actions.cache-buildjet@0.2.0",
-    "@actions/cache": "npm:github-actions.warp-cache@1.1.16",
+    "@actions/cache": "npm:github-actions.warp-cache@1.4.5",
     "@actions/core": "^1.10.1",
     "@actions/exec": "^1.1.1",
     "@actions/glob": "^0.4.0",
