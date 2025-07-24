@@ -125,9 +125,11 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                 // Internal Error
                 return undefined;
             }
+            core.debug(`Cache Entry: ${JSON.stringify(cacheEntry)}`);
             archivePath = path.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
             core.debug(`Archive Path: ${archivePath}`);
             const cacheKey = (_b = (_a = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cache_entry) === null || _a === void 0 ? void 0 : _a.cache_user_given_key) !== null && _b !== void 0 ? _b : primaryKey;
+            core.debug(`Cache Key: ${cacheKey}`);
             switch (cacheEntry.provider) {
                 case 's3':
                 case 'r2': {
@@ -142,7 +144,8 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                         yield cacheHttpClient.downloadCache('s3', (_d = cacheEntry.s3) === null || _d === void 0 ? void 0 : _d.pre_signed_url, archivePath);
                     }
                     catch (error) {
-                        core.info('Cache Miss. Failed to download cache.');
+                        core.debug(`Failed to download cache: ${error}`);
+                        core.info(`Cache Miss. Failed to download cache from ${cacheEntry.provider}. Error: ${error}`);
                         return undefined;
                     }
                     if (core.isDebug()) {
@@ -1451,10 +1454,17 @@ function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options
             keepAlive: true
         });
         try {
-            const res = yield (0, requestUtils_1.retryHttpClientResponse)('downloadCacheMetadata', () => __awaiter(this, void 0, void 0, function* () { return yield httpClient.request('HEAD', archiveLocation, null, {}); }));
-            const lengthHeader = res.message.headers['content-length'];
-            if (lengthHeader === undefined || lengthHeader === null) {
-                throw new Error('Content-Length not found on blob response');
+            // Use Range request to get total file size (works with PresignGetObject URLs)
+            const res = yield (0, requestUtils_1.retryHttpClientResponse)('downloadCacheMetadata', () => __awaiter(this, void 0, void 0, function* () { return yield httpClient.get(archiveLocation, { Range: 'bytes=0-0' }); }));
+            const contentRange = res.message.headers['content-range'];
+            if (!contentRange) {
+                throw new Error('Content-Range header not found - server may not support range requests');
+            }
+            // Parse "bytes 0-0/12345" to get total length (12345)
+            const match = contentRange.match(/bytes \d+-\d+\/(\d+)/);
+            const lengthHeader = match === null || match === void 0 ? void 0 : match[1];
+            if (!lengthHeader) {
+                throw new Error('Could not parse total file size from Content-Range header');
             }
             const length = parseInt(lengthHeader);
             if (Number.isNaN(length)) {
@@ -1498,6 +1508,7 @@ function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options
             while (actives > 0) {
                 yield waitAndWrite();
             }
+            progress.stopDisplayTimer();
         }
         finally {
             httpClient.dispose();
