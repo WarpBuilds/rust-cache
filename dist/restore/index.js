@@ -127917,9 +127917,9 @@ class CacheConfig {
                 try {
                     const content = await promises_default().readFile(cargo_lock, { encoding: "utf8" });
                     const parsed = parse(content);
-                    if (parsed.version !== 3 || !("package" in parsed)) {
+                    if (parsed.version !== 3 || parsed.version !== 4 || !("package" in parsed)) {
                         // Fallback to caching them as regular file since this action
-                        // can only handle Cargo.lock format version 3
+                        // can only handle Cargo.lock format version 3 or 4
                         lib_core.warning('Unsupported Cargo.lock format, fallback to caching entire file');
                         keyFiles.push(cargo_lock);
                         continue;
