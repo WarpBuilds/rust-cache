@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   install:
-    if: github.repository == 'Swatinem/rust-cache'
+    if: github.repository == 'WarpBuilds/rust-cache'
     strategy:
       fail-fast: false
       matrix:

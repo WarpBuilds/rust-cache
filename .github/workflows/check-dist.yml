@@ -13,7 +13,7 @@ on:
 
 jobs:
   check-dist:
-    if: github.repository == 'Swatinem/rust-cache'
+    if: github.repository == 'WarpBuilds/rust-cache'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

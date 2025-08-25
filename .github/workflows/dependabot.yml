@@ -10,7 +10,7 @@ permissions:
 jobs:
   automerge:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'Swatinem/rust-cache'
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'WarpBuilds/rust-cache'
     steps:
       - name: Fetch metadata
         id: metadata
@@ -18,7 +18,7 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
       - uses: actions/checkout@v5
-        with: 
+        with:
           fetch-depth: 2
         if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
       - name: Check if package-lock.json has been changed

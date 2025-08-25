@@ -12,7 +12,7 @@ sensible defaults.
 # before the plugin, as the cache uses the current rustc version as its cache key
 - run: rustup toolchain install stable --profile minimal
 
-- uses: Swatinem/rust-cache@v2
+- uses: WarpBuilds/rust-cache@v2
   with:
     # The prefix cache key, this can be changed to start a new cache manually.
     # default: "v0-rust"
@@ -139,7 +139,7 @@ Before being persisted, the cache is cleaned of:
 - Any build artifacts with an `mtime` older than one week.
 
 In particular, the workspace crates themselves are not cached since doing so is
-[generally not effective](https://github.com/Swatinem/rust-cache/issues/37#issuecomment-944697938).
+[generally not effective](https://github.com/WarpBuilds/rust-cache/issues/37#issuecomment-944697938).
 For this reason, this action automatically sets `CARGO_INCREMENTAL=0` to disable
 incremental compilation, so that the Rust compiler doesn't waste time creating
 the additional artifacts required for incremental builds.
