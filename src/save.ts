@@ -32,11 +32,18 @@ async function run() {
     core.info("");
 
     // TODO: remove this once https://github.com/actions/toolkit/pull/553 lands
-    await macOsWorkaround();
+    if (process.env["RUNNER_OS"] == "macOS") {
+      await macOsWorkaround();
+    }
 
+    const workspaceCrates = core.getInput("cache-workspace-crates").toLowerCase() || "false";
     const allPackages = [];
     for (const workspace of config.workspaces) {
       const packages = await workspace.getPackagesOutsideWorkspaceRoot();
+      if (workspaceCrates === "true") {
+        const wsMembers = await workspace.getWorkspaceMembers();
+        packages.push(...wsMembers);
+      }
       allPackages.push(...packages);
       try {
         core.info(`... Cleaning ${workspace.target} ...`);
@@ -54,11 +61,13 @@ async function run() {
       core.debug(`${(e as any).stack}`);
     }
 
-    try {
-      core.info(`... Cleaning cargo/bin ...`);
-      await cleanBin(config.cargoBins);
-    } catch (e) {
-      core.debug(`${(e as any).stack}`);
+    if (config.cacheBin) {
+      try {
+        core.info(`... Cleaning cargo/bin ...`);
+        await cleanBin(config.cargoBins);
+      } catch (e) {
+        core.debug(`${(e as any).stack}`);
+      }
     }
 
     try {
