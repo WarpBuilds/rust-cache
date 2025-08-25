@@ -13,9 +13,10 @@ on:
 
 jobs:
   check-dist:
+    if: github.repository == 'Swatinem/rust-cache'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node.js 20.x
         uses: actions/setup-node@v4
@@ -38,7 +39,7 @@ jobs:
           fi
         id: diff
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ failure() && steps.diff.conclusion == 'failure' }}
         with:
           name: dist

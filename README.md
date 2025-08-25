@@ -6,7 +6,7 @@ sensible defaults.
 ## Example usage
 
 ```yaml
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 
 # selecting a toolchain either by action or manual `rustup` calls should happen
 # before the plugin, as the cache uses the current rustc version as its cache key
@@ -60,7 +60,13 @@ sensible defaults.
     # default: "false"
     cache-all-crates: ""
 
-    # Determiners whether the cache should be saved.
+    # Similar to cache-all-crates.
+    # If `true` the workspace crates will be cached.
+    # Useful if the workspace contains libraries that are only updated sporadically.
+    # default: "false"
+    cache-workspace-crates: ""
+
+    # Determines whether the cache should be saved.
     # If `false`, the cache is only restored.
     # Useful for jobs where the matrix is additive e.g. additional Cargo features,
     # or when only runs from `master` should be saved to the cache.
@@ -69,6 +75,20 @@ sensible defaults.
     # To only cache runs from `master`:
     save-if: ${{ github.ref == 'refs/heads/master' }}
 
+    # Determines whether the cache should be restored.
+    # If `true` the cache key will be checked and the `cache-hit` output will be set
+    # but the cache itself won't be restored
+    # default: "false"
+    lookup-only: ""
+
+    # Specifies what to use as the backend providing cache
+    # Can be set to "github", "buildjet", or "warpbuild"
+    # default: "github"
+    cache-provider: ""
+
+    # Determines whether to cache the ~/.cargo/bin directory.
+    # default: "true"
+    cache-bin: ""
 ```
 
 Further examples are available in the [.github/workflows](./.github/workflows/) directory.
@@ -165,4 +185,7 @@ to see those details as well as further details related to caching operations.
 ## Known issues
 
 - The cache cleaning process currently removes all the files from `~/.cargo/bin`
-  that were present before the action ran (for example `rustc`).
+  that were present before the action ran (for example `rustc`), by default.
+  This can be an issue on long-running self-hosted runners, where such state
+  is expected to be preserved across runs.  You can work around this by setting
+  `cache-bin: "false"`.
