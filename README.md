@@ -28,6 +28,16 @@ sensible defaults.
     # default: empty
     key: ""
 
+    # If the automatic `job`-based cache key should include the job id.
+    # default: "true"
+    add-job-id-key: ""
+
+    # Weather the a hash of the rust environment should be included in the cache key.
+    # This includes a hash of all Cargo.toml/Cargo.lock files, rust-toolchain files,
+    # and .cargo/config.toml files (if present), as well as the specified 'env-vars'.
+    # default: "true"
+    add-rust-environment-hash-key: ""
+
     # A whitespace separated list of env-var *prefixes* who's value contributes
     # to the environment cache key.
     # The env-vars are matched by *prefix*, so the default `RUST` var will
@@ -89,6 +99,16 @@ sensible defaults.
     # Determines whether to cache the ~/.cargo/bin directory.
     # default: "true"
     cache-bin: ""
+
+    # A format string used to format commands to be run, i.e. `rustc` and `cargo`.
+    # Must contain exactly one occurance of `{0}`, which is the formatting fragment
+    # that will be replaced with the `rustc` or `cargo` command. This is necessary
+    # when using Nix or other setup that requires running these commands within a
+    # specific shell, otherwise the system `rustc` and `cargo` will be run.
+    # default: "{0}"
+    cmd-format: ""
+    # To run within a Nix shell (using the default dev shell of a flake in the repo root):
+    cmd-format: nix develop -c {0}
 ```
 
 Further examples are available in the [.github/workflows](./.github/workflows/) directory.
@@ -101,14 +121,14 @@ This is a boolean flag that will be set to `true` when there was an exact cache 
 
 ## Cache Effectiveness
 
-This action only caches the _dependencies_ of a crate, so is more effective if
+This action only caches the _dependencies_ of a crate, so it is more effective if
 the dependency / own code ratio is higher.
 
-It is also most effective for repositories with a `Cargo.lock` file. Library
+It is also more effective for repositories with a `Cargo.lock` file. Library
 repositories with only a `Cargo.toml` file have limited benefits, as cargo will
 _always_ use the most up-to-date dependency versions, which may not be cached.
 
-Usage with Stable Rust is most effective, as a cache is tied to the Rust version.
+Usage with Stable Rust is the most effective, as a cache is tied to the Rust version.
 Using it with Nightly Rust is less effective as it will throw away the cache every day,
 unless a specific nightly build is being pinned.
 
@@ -121,12 +141,15 @@ This action currently caches the following files/directories:
 
 This cache is automatically keyed by:
 
-- the github [`job_id`](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_id),
-- the rustc release / host / hash,
-- the value of some compiler-specific environment variables (eg. RUSTFLAGS, etc), and
-- a hash of all `Cargo.lock` / `Cargo.toml` files found anywhere in the repository (if present).
-- a hash of all `rust-toolchain` / `rust-toolchain.toml` files in the root of the repository (if present).
-- a hash of all `.cargo/config.toml` files in the root of the repository (if present).
+- the github [`job_id`](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_id)
+(if `add-job-id-key` is `"true"`),
+- the rustc release / host / hash (for all installed toolchains when
+  available),
+- the following values, if `add-rust-environment-hash-key` is `"true"`:
+  - the value of some compiler-specific environment variables (eg. RUSTFLAGS, etc), and
+  - a hash of all `Cargo.lock` / `Cargo.toml` files found anywhere in the repository (if present).
+  - a hash of all `rust-toolchain` / `rust-toolchain.toml` files in the root of the repository (if present).
+  - a hash of all `.cargo/config.toml` files in the root of the repository (if present).
 
 An additional input `key` can be provided if the builtin keys are not sufficient.
 
