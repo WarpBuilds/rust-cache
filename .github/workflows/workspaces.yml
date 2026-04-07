@@ -2,6 +2,8 @@ name: workspaces
 
 on: [push, pull_request]
 
+permissions: {}
+
 jobs:
   workspaces:
     if: github.repository == 'WarpBuilds/rust-cache'
@@ -17,7 +19,9 @@ jobs:
       CARGO_TERM_COLOR: always
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - run: rustup toolchain install stable --profile minimal --target wasm32-unknown-unknown --no-self-update
 

@@ -11,17 +11,21 @@ on:
       - "**.md"
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   check-dist:
     if: github.repository == 'WarpBuilds/rust-cache'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup Node.js 20.x
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          node-version: 20.x
+          persist-credentials: false
+
+      - name: Setup Node.js 24.x
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 24.x
           cache: npm
 
       - name: Install dependencies
@@ -39,7 +43,7 @@ jobs:
           fi
         id: diff
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         if: ${{ failure() && steps.diff.conclusion == 'failure' }}
         with:
           name: dist
